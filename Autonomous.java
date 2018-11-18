@@ -1,0 +1,48 @@
+
+public class Autonomous implements WorldObject{
+	private String name;
+	private char token = '^';
+	private int x, y;
+	private double direction = 0;
+	
+	public Autonomous(String name) {
+		this.name = name;
+	}
+	public void setX(int newX){
+		this.x = newX;
+	}
+	
+	public void setY(int newY){	//setting the coordinates
+		this.y = newY;
+	}
+	
+	public int getX(){
+		return this.x;
+	}
+	
+	public int getY(){			//getting the coordinates 
+		return this.y;
+	}
+	
+	public char getToken(){		//getting the token
+		return this.token;
+	}
+	public String getName() {
+		return this.name;
+	}
+	public void setDirection(double direction) {
+		this.direction = direction;
+		if (this.direction < 0.25) {
+			this.token = '^';
+		}
+		else if (this.direction < 0.5) {
+			this.token = '>';
+		}
+		else if (this.direction < 0.75) {
+			this.token = 'v';
+		}
+		else if (this.direction < 1.0) {
+			this.token = '<';
+		}
+	}
+}
