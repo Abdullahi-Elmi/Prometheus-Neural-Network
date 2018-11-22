@@ -1,3 +1,18 @@
+/*
+ This is the class for the first level of the Prometheus AI, the Neural Network
+ It is implimented as a single layer Perceptron that is trained through Stochastic Gradient Descent (SGD)
+ It takes inputs from the Drone's Sensors and calculates which of the Drone's current Actions is best suited for the situation
+
+ Data is given to the Perceptron matrix as a 2D array of integers
+ If the drone has N sensors and M actions, then one line of that data should be given in the form:
+ [N,N,N,  M,M,M] for N=M=3
+ So if you want the drone to respond to an input from its sensors being [1,0,1], and have all but the last action be a possibility,
+ then it would look like [1,0,1,  1,1,0]
+ There should be 3^N datapoints to cover each possible sensor value and configuration (sensors can be = [-1,0,1])
+
+ The perceptron will calculate each possible Action given the Sensor input and choose the highest scoring Action, choosing ties randomly
+ If no dominant Action exists, it throws an indecisiveException to the drone
+*/
 import java.util.Arrays;
 import java.util.stream.DoubleStream;
 
@@ -7,17 +22,17 @@ public class PerceptronMatrix {
 	private Action[] actions;
 	private double[][] parameters;
 	private double[] bias;
-	
+
 	public PerceptronMatrix(int input_number, Action[] actions) {
 		int	output_number = actions.length;
-		
+
 		this.inputs = new double[input_number];
 		this.outputs = new double[output_number];
 		this.actions = actions;
 		this.parameters = new double[output_number][input_number];
 		this.bias = new double[output_number];
 	}
-	
+
 	public void setInputs(double[] inputs) {
 		this.inputs = inputs;
 	}
@@ -35,7 +50,7 @@ public class PerceptronMatrix {
 				double rand = Math.random();
 				if(rand < 0.5) {
 					max_index = index;
-				}		
+				}
 			}
 			index++;
 		}
@@ -49,14 +64,13 @@ public class PerceptronMatrix {
 		else {
 			return actions[max_index];
 		}
-		
+
 	}
 	public double[] getOutputs() {
 		return this.outputs;
 	}
-		
-	private static double sigmoid(double x)
-	{
+
+	private static double sigmoid(double x){
 	    return 1 / (1 + Math.exp(-x));
 	}
 
@@ -81,17 +95,17 @@ public class PerceptronMatrix {
 			returnVector[i] = vector1[i]+vector2[i];
 		}
 		return returnVector;
-		
+
 	}
 	public void calculateOutputs() {
 		this.outputs = matrixMultiplication(this.inputs, this.parameters);
 		this.outputs = vectorAddition(this.outputs, this.bias);
 		DoubleStream stream = Arrays.stream(this.outputs).map(x ->{return Math.round(sigmoid(x)*100000)/100000.0;});
-		this.outputs = stream.toArray();	
+		this.outputs = stream.toArray();
 	}
-	
+
 	private double predict(double pbias, double[] pweights, double[] pinputs) {
-		
+
 		double activation = pbias;
 		for(int i = 0; i < pinputs.length; i++){
 			activation += pweights[i] * pinputs[i];
@@ -107,15 +121,15 @@ public class PerceptronMatrix {
 			}
 			error += Math.pow(data_classifications[i] - polyval, 2);
 		}
-		return (error/data_inputs.length);		
+		return (error/data_inputs.length);
 	}
-	
+
 	private void learnRowWeights(int row_number, double[][] training_data) {
 		double[] weights = this.parameters[row_number].clone();
 		double bias = this.bias[row_number];
 		double[][] inputs = new double[training_data.length][this.inputs.length];
 		double[] outputs =  new double[training_data.length];
-		
+
 		for(int row=0;row<training_data.length;row++) {
 			for(int column=0;column<training_data[row].length;column++) {
 				if(column < this.inputs.length) {
@@ -126,26 +140,26 @@ public class PerceptronMatrix {
 				}
 			}
 		}
-		int epoch = 10000000; 
+		int epoch = 10000000;
 		double stepsize = 1e-4;
 		double mseCutoff = 1e-20;
-		for(int i=0;i<epoch; i++) {	
+		for(int i=0;i<epoch; i++) {
 			double[] sum = new double[this.inputs.length+1];
-			
+
 			for(int j=0;j<training_data.length;j++) {
 				double prediction = predict(bias,weights,inputs[j]);
 				double error = prediction - outputs[j];
 				sum[0] += error;
 				for(int k=1;k<sum.length;k++) {
 					sum[k] += error * inputs[j][k-1];
-				}				
+				}
 			}
-			
+
 			bias -= stepsize * (sum[0]/ training_data.length);
 			for(int k=1;k<sum.length;k++) {
 				weights[k-1] -= stepsize * (sum[k]/ training_data.length);
 			}
-			
+
 			if( (meanSquareError(inputs, outputs, this.parameters[row_number],this.bias[row_number]) - meanSquareError(inputs, outputs, weights,bias)) < mseCutoff) {
 				this.parameters[row_number] = weights.clone();
 				this.bias[row_number] = bias;
@@ -158,7 +172,7 @@ public class PerceptronMatrix {
 	public void learnAllWeights(double[][] training_data) {
 		double[][] training_subset = new double[training_data.length][this.inputs.length+1];
 		for(int i=0;i<this.parameters.length;i++) {
-			
+
 			for(int row=0;row<training_subset.length;row++) {
 				for(int column=0;column<training_subset[row].length;column++) {
 					if(column<this.inputs.length) {
@@ -172,7 +186,8 @@ public class PerceptronMatrix {
 			learnRowWeights(i,training_subset);
 		}
 	}
-    private void printRow(double[] row, int rowNum) {
+
+	private void printRow(double[] row, int rowNum) {
     	System.out.printf("% 6f |",this.bias[rowNum]);
         for (double i : row) {
             System.out.printf("% 6f  ",i);
@@ -180,7 +195,6 @@ public class PerceptronMatrix {
         System.out.printf("%-5s",this.actions[rowNum].getName());
         System.out.println();
     }
-    
 	public void print() {
 		System.out.printf("%9s  ", "bias");
 		for (int i =0;i<this.inputs.length;i++) {

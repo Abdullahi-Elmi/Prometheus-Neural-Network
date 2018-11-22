@@ -1,29 +1,33 @@
-
+/*
+This class is a case of WorldObject
+It represents the drone(s) that currently exist in the world representation
+It differs from other WorldObjects in that it has a setDirection function that sets the objects direction and changes its token to match
+*/
 public class Autonomous implements WorldObject{
 	private String name;
 	private char token = '^';
 	private int x, y;
 	private double direction = 0;
-	
+
 	public Autonomous(String name) {
 		this.name = name;
 	}
 	public void setX(int newX){
 		this.x = newX;
 	}
-	
+
 	public void setY(int newY){	//setting the coordinates
 		this.y = newY;
 	}
-	
+
 	public int getX(){
 		return this.x;
 	}
-	
-	public int getY(){			//getting the coordinates 
+
+	public int getY(){			//getting the coordinates
 		return this.y;
 	}
-	
+
 	public char getToken(){		//getting the token
 		return this.token;
 	}
