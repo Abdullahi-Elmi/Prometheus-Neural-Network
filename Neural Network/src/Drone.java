@@ -85,7 +85,7 @@ public class Drone {
 
 	}
 
-	public void addSensor(Sensor sensor){
+	public void addSensor(Sensor sensor, double[][] training_data){
 		Sensor[] sensor_append = new Sensor[this.sensors.length+1];
 		int i=0;
 		for(Sensor snsr : this.sensors){
@@ -94,11 +94,11 @@ public class Drone {
 		}
 		sensor_append[sensor_append.length-1] = sensor;
 		this.sensors = sensor_append;
-		this.perceptronMatrix.addSensor(sensor)
+		this.perceptronMatrix.addSensor(sensor, training_data);
 	}
 
 	public void addAction(Action action, double[][] training_data){
-		Action[] action_append = new action[this.actions.length+1];
+		Action[] action_append = new Action[this.actions.length+1];
 		int i=0;
 		for(Action actn : this.actions){
 			action_append[i] = actn;

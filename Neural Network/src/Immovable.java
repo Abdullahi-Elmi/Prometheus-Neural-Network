@@ -15,7 +15,7 @@ public class Immovable implements WorldObject{
 	public void setY(int newY){	//setting the coordinates
 		this.y = newY;
 	}
-
+	
 	public int getX(){
 		return this.x;
 	}
