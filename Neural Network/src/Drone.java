@@ -52,39 +52,6 @@ public class Drone {
 		this.direction = dir;
 	}
 
-	//uses training data to train the drone's perceptron matrix
-	public void trainDrone(double[][] training_data) {
-		this.perceptronMatrix.learnAllWeights(training_data);
-	}
-
-	//gets the visible x and y coordinates based on the drone's current orientation
-	private int[][] getVisible(){
-
-		int[][] visible = new int[this.sensors.length][2];
-		int i = 0;
-		for(Sensor sensor : this.sensors) {
-			if (this.direction < 0.25) {		//up
-				visible[i][0] = this.x + sensor.getX();
-				visible[i][1] = this.y - sensor.getY();
-			}
-			else if (this.direction < 0.5) {	//right
-				visible[i][0] = this.x + sensor.getY();
-				visible[i][1] = this.y + sensor.getX();
-			}
-			else if (this.direction < 0.75) {	//down
-				visible[i][0] = this.x - sensor.getX();
-				visible[i][1] = this.y + sensor.getY();
-			}
-			else if (this.direction < 1.0) {	//left
-				visible[i][0] = this.x - sensor.getY();
-				visible[i][1] = this.y - sensor.getX();
-			}
-			i++;
-		}
-		return visible;
-
-	}
-
 	public void addSensor(Sensor sensor, double[][] training_data){
 		Sensor[] sensor_append = new Sensor[this.sensors.length+1];
 		int i=0;
@@ -108,46 +75,79 @@ public class Drone {
 		this.actions = action_append;
 		this.perceptronMatrix.addAction(action,training_data);
 	}
+	//uses training data to train the drone's perceptron matrix
+	public void trainDrone(double[][] training_data) {
+		this.perceptronMatrix.learnAllWeights(training_data);
+	}
 
-	//gets the objects in the world that the drone can currently see
-	private WorldObject[] getVisibleObjects(int[][] visible_cells) {
+	//gets the visible x and y coordinates based on the drone's current orientation
+	private int[][] getVisible(Sensor sensor){
 
-		WorldObject[] visible_objects = new WorldObject[visible_cells.length];
-		int i=0;
-		for(Sensor sensor : this.sensors) {
-			int x = visible_cells[i][0];
-			int y = visible_cells[i][1];
-			if(this.world.getWorldArray()[y][x] instanceof WorldObject) {
-				visible_objects[i] = this.world.getWorldArray()[y][x];
-			}
-			else {
-				visible_objects[i] = null;
+		int[][] visible = new int[this.sensors.length][2];
+		int i = 0;
+		for(int x : sensor.getX()){
+			for(int y : sensor.getY()){
+				if (this.direction < 0.25) {		//up
+					visible[i][0] = this.x + x;
+					visible[i][1] = this.y - y;
+				}
+				else if (this.direction < 0.5) {	//right
+					visible[i][0] = this.x + y;
+					visible[i][1] = this.y + x;
+				}
+				else if (this.direction < 0.75) {	//down
+					visible[i][0] = this.x - x;
+					visible[i][1] = this.y + y;
+				}
+				else if (this.direction < 1.0) {	//left
+					visible[i][0] = this.x - y;
+					visible[i][1] = this.y - x;
+				}
 			}
 			i++;
 		}
-		return visible_objects;
+		return visible;
+	}
+	private int[][] getAllVisible(){
+		int[][] visible = new int[this.sensors.length][2];
+		int i = 0;
+		for(Sensor sensor : this.sensors){
+			for(int x : sensor.getX()){
+				for(int y : sensor.getY()){
+					if (this.direction < 0.25) {		//up
+						visible[i][0] = this.x + x;
+						visible[i][1] = this.y - y;
+					}
+					else if (this.direction < 0.5) {	//right
+						visible[i][0] = this.x + y;
+						visible[i][1] = this.y + x;
+					}
+					else if (this.direction < 0.75) {	//down
+						visible[i][0] = this.x - x;
+						visible[i][1] = this.y + y;
+					}
+					else if (this.direction < 1.0) {	//left
+						visible[i][0] = this.x - y;
+						visible[i][1] = this.y - x;
+					}
+				}
+			}
+			i++;
+		}
+		return visible;
 	}
 
 	//uses the currently visible objects as inputs for the drone's perceptron matrix
 	//perceptron matrix then makes a decision and outputs an action for the drone, which the drone then takes
 	//if the drone is indecisive it will throw an error that will be caught in the run() function
-	private void makeDecision(WorldObject[] visible_objects) throws indecisiveException {
-		double[] inputs = new double[visible_objects.length];
+	private void makeDecision() throws indecisiveException {
 		int i=0;
-		//***TO DO** have the sensors themselves just do this work here, would make more sense
+		double[] inputs = new double[this.sensors.length];
 		for(Sensor sensor : this.sensors) {
-			if(visible_objects[i]==null) {
-				inputs[i] = 1.0;
-			}
-			else if(visible_objects[i].getClass().equals(sensor.getSignal())) {
-				inputs[i] = -1.0;
-			}
-			else {
-				inputs[i] = 0;
-			}
+			int[][] visible = getVisible(sensor);
+			inputs[i] = sensor.score(world, visible);
 			i++;
 		}
-
 		this.perceptronMatrix.setInputs(inputs);
 		try {
 			Action decision = this.perceptronMatrix.makeDecision();
@@ -189,15 +189,13 @@ public class Drone {
 	public void run(int itterations) {
 		while(itterations>0) {
 			//System.out.println(itterations);
-
-			int[][] visible = getVisible();
+			int[][] visible = getAllVisible();
 			//System.out.println(Arrays.deepToString(visible));
 			//System.out.println(this.direction);
 			world.display(this.name, visible);
 			//world.display();
-			WorldObject[] visibleObjects = getVisibleObjects(visible);
 			try {
-				makeDecision(visibleObjects);
+				makeDecision();
 			}
 			catch(indecisiveException e) {
 				runSimulation();

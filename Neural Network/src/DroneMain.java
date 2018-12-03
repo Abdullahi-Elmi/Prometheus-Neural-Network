@@ -12,17 +12,17 @@ public class DroneMain {
 		Action rl = new Action("rl",0,0,-.25);
 		Action rr = new Action("rr",0,0,.25);
 		Action[] actions = {fl,f,fr,l,r,bl,b,br,rl,rr};
-		
-		Sensor fl_Im = new Sensor(new Immovable(),-1,1);
-		Sensor  f_Im = new Sensor(new Immovable(), 0,1);
-		Sensor fr_Im = new Sensor(new Immovable(), 1,1);
+
+		Sensor fl_Im = new Basic_Sensor(new Immovable(),-1,1);
+		Sensor  f_Im = new Basic_Sensor(new Immovable(), 0,1);
+		Sensor fr_Im = new Basic_Sensor(new Immovable(), 1,1);
 
 		Sensor[] sensors = {fl_Im,f_Im,fr_Im};
-				
+
 		TheWorld world = buildSquareWorld(6);
-		//drawLine(world,new Immovable(),2,3,4,3);
-		drawLine(world,new Moveable(),2,3,4,3);	
-		
+		drawLine(world,new Immovable(),2,3,4,3);
+		//drawLine(world,new Moveable(),2,3,4,3);
+
 		/*
 		drawLine(world,2,1,2,3);
 		drawLine(world,0,5,4,5);
@@ -33,25 +33,25 @@ public class DroneMain {
 		drawLine(world,5,7,5,8);
 		*/
 
-		double[][] data = {				
+		double[][] data = {
 				{ 1, 1, 1,	 1, 1, 1,0,0,0,0,0,0,0},
 				{-1,-1,-1,	-1,-1,-1,0,0,0,0,0,1,1},
 				{ 0, 0, 0,	 0, 0, 0,0,0,0,0,0,0,0},
-				
+
 				{-1,-1, 1,	-1,-1, 1,0,0,0,0,0,0,0},
 				{-1, 1, 1,	-1, 1, 1,0,0,0,0,0,0,0},
 				{ 1, 1,-1,	 1, 1,-1,0,0,0,0,0,0,0},
 				{ 1,-1,-1,	 1,-1,-1,0,0,0,0,0,0,0},
 				{-1, 1,-1,	-1, 1,-1,0,0,0,0,0,0,0},
 				{ 1,-1, 1,	 1,-1, 1,0,0,0,0,0,0,0},
-				
+
 				{ 0, 0, 1,	 0, 0, 1,0,0,0,0,0,0,0},
 				{ 0, 1, 1,	 0, 1, 1,0,0,0,0,0,0,0},
 				{ 1, 0, 0,	 1, 0, 0,0,0,0,0,0,0,0},
 				{ 1, 1, 0,	 1, 1, 0,0,0,0,0,0,0,0},
 				{ 1, 0, 1,	 1, 0, 1,0,0,0,0,0,0,0},
 				{ 0, 1, 0,	 0, 1, 0,0,0,0,0,0,0,0},
-				
+
 				{-1,-1, 0,	-1,-1, 0,0,0,0,0,0,0,0},
 				{-1, 0, 0,	-1, 0, 0,0,0,0,0,0,0,0},
 				{ 0,-1,-1,	 0,-1,-1,0,0,0,0,0,0,0},
@@ -59,12 +59,12 @@ public class DroneMain {
 				{-1, 0,-1,	-1, 0,-1,0,0,0,0,0,0,0},
 				{ 0,-1, 0,	 0,-1, 0,0,0,0,0,0,0,0}
 		};
-		
+
 		Drone testDrone = new Drone("test",actions,sensors, world,3,4,0);
 		testDrone.trainDrone(data);
 		world.display();
 		testDrone.perceptronMatrix.print();
-		testDrone.run(2);
+		testDrone.run(20);
 		//System.exit(0);
 	}
 	public static TheWorld buildSquareWorld(int size) {
@@ -74,26 +74,26 @@ public class DroneMain {
 				if(x==0 || x== size-1 || y==0 || y==size-1) {
 					world.add(new Immovable(), x, y);
 				}
-			}	
+			}
 		}
 		return world;
 	}
     private static void drawLine(TheWorld world, WorldObject obj, int x1, int y1, int x2, int y2) {
     	 // delta of exact value and rounded value of the dependent variable
         int d = 0;
- 
+
         int dx = Math.abs(x2 - x1);
         int dy = Math.abs(y2 - y1);
- 
+
         int dx2 = 2 * dx; // slope scaling factors to
         int dy2 = 2 * dy; // avoid floating point
- 
+
         int ix = x1 < x2 ? 1 : -1; // increment direction
         int iy = y1 < y2 ? 1 : -1;
- 
+
         int x = x1;
         int y = y1;
- 
+
         if (dx >= dy) {
             while (true) {
                 plot(world, obj, x, y);

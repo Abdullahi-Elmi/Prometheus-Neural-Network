@@ -1,4 +1,4 @@
-public interface Sensor{
+public interface SensorObject{
     public Class getSignal();
     public int[] getX();
     public int[] getY();

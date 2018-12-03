@@ -1,4 +1,8 @@
+
 /*
+
+import java.util.Arrays;
+import java.util.stream.DoubleStream;
  This is the class for the first level of the Prometheus AI, the Neural Network
  It is implimented as a single layer Perceptron that is trained through Stochastic Gradient Descent (SGD)
  It takes inputs from the Drone's Sensors and calculates which of the Drone's current Actions is best suited for the situation
@@ -13,8 +17,8 @@
  The perceptron will calculate each possible Action given the Sensor input and choose the highest scoring Action, choosing ties randomly
  If no dominant Action exists, it throws an indecisiveException to the drone
 */
-import java.util.Arrays;
 import java.util.stream.DoubleStream;
+import java.util.Arrays;
 
 public class PerceptronMatrix {
 	private double[] inputs; //[-1,0,1] values that correspond to the sensor values
